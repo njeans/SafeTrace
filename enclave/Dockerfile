@@ -41,6 +41,9 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y \
                 build-essential \
+                clang \
+                llvm \
+                libzmq3-dev \
                 ocaml \
                 ocamlbuild \
                 automake \
@@ -52,7 +55,6 @@ RUN apt-get update && apt-get install -y \
                 libcurl4-openssl-dev \
                 protobuf-compiler \
                 libprotobuf-dev \
-                sudo \
                 kmod \
                 vim \
                 curl \
@@ -118,10 +120,16 @@ RUN set -eux; \
 
 RUN rustup toolchain install nightly
 RUN rustup default ${rust_toolchain}
-RUN cargo +nightly install bindgen
-RUN cargo +nightly install fortanix-sgx-tools sgxs-tools
-#
-#RUN /root/.cargo/bin/rustup component add rust-src rls rust-analysis clippy rustfmt && \
+RUN cargo +nightly install bindgen fortanix-sgx-tools sgxs-tools
+
+RUN rustup component add rust-src rls rust-analysis clippy rustfmt
 #    /root/.cargo/bin/cargo install xargo && \
 #   rm -rf /root/.cargo/registry && rm -rf /root/.cargo/git
-WORKDIR /root
+
+#RUN git clone --single-branch --branch v1.0.9 https://github.com/apache/incubator-teaclave-sgx-sdk.git /root/sgx
+RUN git clone --depth 1  -b v1.0.9 https://github.com/apache/incubator-teaclave-sgx-sdk /root/sgx
+
+COPY . /usr/src/enclave
+WORKDIR /usr/src/enclave/safetrace
+COPY remove_dir_all-patched-lib.rs /usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/remove_dir_all-0.5.3/src/lib.rs
+#RUN make clean && make

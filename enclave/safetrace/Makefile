@@ -18,7 +18,8 @@
 ######## SGX SDK Settings ########
 
 # The directory where intel sgx is installed
-SGX_SDK ?= $(HOME)/.sgxsdk/sgxsdk
+#SGX_SDK ?= $(HOME)/.sgxsdk/sgxsdk
+SGX_SDK ?= /opt/sgxsdk
 
 # The path to the incubator-teaclave-sgx-sdk code.
 SGX_SDK_RUST ?= $(HOME)/sgx
