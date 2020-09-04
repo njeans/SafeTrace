@@ -5,7 +5,7 @@ services:
     image: sgx-sdk
     build:
       context: enclave
-      dockerfile: Dockerfile
+      dockerfile: runtime.Dockerfile
     ports:
       - 5552:5552
     volumes:

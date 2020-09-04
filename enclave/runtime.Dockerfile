@@ -44,8 +44,33 @@ RUN mkdir /root/sgx && \
 #    echo -e 'no\n/opt' | ./$SGX_LINUX_X64_SDK && \
 #    rm $SGX_LINUX_X64_SDK                     && \
 #    echo 'source /opt/sgxsdk/environment' >> /etc/environment
-ENV LD_LIBRARY_PATH=/opt/sgxsdk/sdk_libs
+#ENV LD_LIBRARY_PATH=/opt/sgxsdk/sdk_libs
 
 RUN apt-get update && apt-get install -q -y \
     libzmq3-dev
+
+ENV rust_toolchain nightly-2019-08-01
+ENV RUSTUP_HOME=/usr/local/rustup \
+    CARGO_HOME=/usr/local/cargo \
+    PATH=/usr/local/cargo/bin:$PATH
+RUN set -eux; \
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y; \
+    chmod -R a+w $RUSTUP_HOME $CARGO_HOME; \
+    rustup --version; \
+    cargo --version; \
+    rustc --version;
+
+RUN rustup toolchain install nightly
+RUN rustup default ${rust_toolchain}
+RUN cargo +nightly install bindgen fortanix-sgx-tools sgxs-tools
+
+RUN rustup component add rust-src rls rust-analysis clippy rustfmt
+#    /root/.cargo/bin/cargo install xargo && \
+#   rm -rf /root/.cargo/registry && rm -rf /root/.cargo/git
+
+RUN apt-get update && apt-get install -q -y git-core
+#RUN git clone --single-branch --branch v1.0.9 https://github.com/apache/incubator-teaclave-sgx-sdk.git /root/sgx
+RUN git clone --depth 1  -b v1.0.9 https://github.com/apache/incubator-teaclave-sgx-sdk /root/sgx
+
+
 ADD safetrace/bin/safetrace-app /usr/local/bin/safetrace-app
